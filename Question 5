@@ -1,0 +1,24 @@
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, 
+lubridate, stringr, readxl, data.table, gdata)
+
+full_data <- readRDS("data/output/full_ma_data.rds")
+con_data <- readRDS("data/output/contract_service_area.rds")
+
+final_data <- inner_join(full_data, con_data %>% 
+               select(contractid, fips, year), 
+             by=c("contractid", "fips", "year"))
+
+library(ggplot2)
+ggplot(final_data, aes(x = year, y = enrollees)) +
+  
+  # Choose a plot type, e.g., geom_line for a line chart
+  geom_line(aes(group = county, color = county), linewidth = 1) +
+  
+  # Customize the plot labels and title
+  labs(title = "Average Medicare Advantage Enrollees per County (2010-2015)",
+       x = "Year",
+       y = "Average Enrollees") +
+  
+  # Customize the theme if needed
+  theme_minimal()

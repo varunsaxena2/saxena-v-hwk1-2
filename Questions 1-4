@@ -1,0 +1,40 @@
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata)
+
+data <- readRDS("data/output/full_ma_data.rds")
+summary(data)
+num_observations <- nrow(data)
+print(num_observations)
+
+num_plan_types <- length(unique(data$plan_type))
+cat("Number of different plan types", num_plan_types, "\n")
+
+plan_count_table <- data %>%
+  group_by(year, plan_type) %>%
+  summarise(plan_count = n()) %>%
+  pivot_wider(names_from = year, values_from = plan_count, values_fill = 0)
+
+# Print the table
+print(plan_count_table, n=27)
+
+#Filter out the SNP, eghp, and 800-series plans
+filtered_data <- data %>%
+  filter(!(snp == 'No') & (eghp == 'No'))
+
+# Count of observations after exclusions
+num_observations_after_exclusions <- nrow(filtered_data)
+print(paste("Number of observations after exclusions: ", num_observations_after_exclusions))
+
+# Count of unique plan types after exclusions
+num_plan_types_after_exclusions <- length(unique(filtered_data$plan_type))
+print(paste("Number of different plan_types after exclusions: ", num_plan_types_after_exclusions))
+
+# Create a table of plan counts by year and plan type after exclusions
+plan_count_table_after_exclusions <- filtered_data %>%
+  group_by(year, plan_type) %>%
+  summarise(plan_count = n()) %>%
+  pivot_wider(names_from = year, values_from = plan_count, values_fill = 0)
+
+# Print the updated table
+print(plan_count_table_after_exclusions, n=27)
+
